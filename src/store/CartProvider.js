@@ -9,12 +9,39 @@ const defaultCartState = {
 
 const cartReducer = (state, action) => {
   if (action.type === 'ADD_ITEM') {
-    const updatedItems = state.items.concat(action.item);
     const updatedTotalAmount =
       state.totalAmount + action.item.price * action.item.amount;
+
+    // check if item type (sushi vs schitzel vs barbeque bowl etc...) is already in the state.items list
+    const existingItemIndex = state.items.findIndex(
+      (item) => item.id === action.item.id
+    );
+
+    let updatedItems = [...state.items];
+
+    if (!(existingItemIndex + 1 === 0)) {
+      updatedItems[existingItemIndex].amount =
+        updatedItems[existingItemIndex].amount + action.item.amount;
+    } else {
+      updatedItems = updatedItems.concat(action.item);
+    }
+
     return { items: updatedItems, totalAmount: updatedTotalAmount };
-  } else if (action.type === 'REMOVE_ITEM') {
   }
+
+  if (action.type === 'REMOVE_ITEM') {
+    //
+    let updatedItems = [...state.items];
+    let updatedItem = updatedItems.find((item) => item.id === action.id);
+    updatedItem.amount = updatedItem.amount - 1;
+
+    const updatedTotalAmount = state.totalAmount - updatedItem.price;
+
+    updatedItems = updatedItems.filter((item) => item.amount > 0);
+
+    return { items: updatedItems, totalAmount: updatedTotalAmount };
+  }
+
   return defaultCartState;
 };
 
